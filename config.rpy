@@ -1,153 +1,117 @@
 # ============================================================================
-# DLC 模板 - 配置文件
+# CodeLove-Py-DLC - Python 語言角色 DLC
 # ============================================================================
 #
-# 這是一個完整的 DLC 模板，展示如何創建可與主線整合的擴展內容。
-# 複製此目錄並修改以創建你自己的 DLC。
-#
-# 使用步驟：
-# 1. 複製 rpy/dlc/template_dlc/ 目錄
-# 2. 重命名為你的 DLC ID（如 rpy/dlc/my_story/）
-# 3. 修改所有文件中的 "template" 為你的 DLC ID
-# 4. 編輯角色、事件、結局
-# 5. 測試並發布
+# 區域架構：
+# - Zen Garden 是 Py 的專屬區域
+# - 從廣場可以前往此區域
+# - 區域內有自己的地點菜單和事件管理
+# ============================================================================
+
+# ============================================================================
+# 1. DLC 配置
 # ============================================================================
 
 init python:
-    # ============================================================================
-    # DLC 元數據
-    # ============================================================================
-
-    template_dlc_info = {
-        "id": "template_dlc",           # DLC 唯一標識符（必須與目錄名一致）
-        "name": "模板 DLC",              # 顯示名稱
-        "version": "1.0.0",             # 版本號
-        "author": "你的名字",            # 作者
-        "description": "一個展示 DLC 結構的模板",  # 描述
-        "dependencies": [],             # 依賴的其他 DLC ID
-        "conflicts": [],                # 衝突的 DLC ID
-        "min_main_version": "0.1.0",    # 最低主線版本要求
+    # DLC 基本資訊
+    py_dlc_config = {
+        "id": "py_dlc",
+        "name": "Python 擴展包",
+        "version": "1.0.0",
+        "author": "CodeLove Community",
+        "description": "添加 Python 語言角色 Py 及其專屬區域 Zen Garden。",
     }
 
-    # ============================================================================
-    # DLC 選項
-    # ============================================================================
+    # 註冊 DLC
+    register_dlc(py_dlc_config)
 
-    template_dlc_options = {
-        # 是否禁用主線結局的強制觸發
-        # True = DLC 可以延後主線結局到 custom_ending_threshold
-        "disable_main_ending": False,
+# ============================================================================
+# 2. 區域註冊
+# ============================================================================
 
-        # 自定義結局觸發時間
-        # 只有當 disable_main_ending = True 時有效
-        "custom_ending_threshold": 42,
+init python:
+    def py_region_unlock_condition():
+        """Py 區域的解鎖條件"""
+        # 條件：完成 C_01（指標教學）後解鎖
+        return store.c_01_status == "completed"
 
-        # 是否使用獨立時間線
-        # True = DLC 有自己的時間系統，不影響主線
-        "independent_timeline": False,
+    # 註冊 Zen Garden 區域
+    register_dlc_region("zen_garden", {
+        "name": "Zen Garden",
+        "description": "Py 的禪意花園，一個追求簡潔與優雅的地方",
+        "dlc_id": "py_dlc",
+        "entry_label": "enter_zen_garden",
+        "unlock_condition": py_region_unlock_condition,
+        "hub_bg": "bg zen_garden"
+    })
 
-        # 是否與主線整合
-        # True = DLC 角色可以出現在主線事件中
-        "integrate_with_main": True,
+# ============================================================================
+# 3. 區域時間線（內部管理）
+# ============================================================================
+
+init python:
+    # Py 區域內部的事件時間線
+    # 這是區域自己的時間線，不和主線強制對齊
+    py_region_events = {
+        "PY_01": {
+            "name": "縮排的藝術",
+            "label": "PY_01",
+            "unlock_condition": lambda: True,  # 永遠可用
+            "repeatable": False
+        },
+        "PY_02": {
+            "name": "列表推導式",
+            "label": "PY_02",
+            "unlock_condition": lambda: store.py_relationship in ["FRIEND", "CLOSE", "PARTNER"],
+            "repeatable": False
+        },
+        "PY_03": {
+            "name": "GIL 與並發",
+            "label": "PY_03",
+            "unlock_condition": lambda: store.py_relationship in ["CLOSE", "PARTNER"],
+            "repeatable": False
+        }
     }
 
-    # ============================================================================
-    # 結局檢查函數
-    # ============================================================================
+    def get_available_py_events():
+        """獲取當前可用的 Py 事件"""
+        available = []
+        for event_id, event_info in py_region_events.items():
+            # 檢查解鎖條件
+            if event_info["unlock_condition"]():
+                # 檢查是否已完成（非可重複事件）
+                status_var = f"py_{event_id.lower()}_status"
+                if hasattr(store, status_var):
+                    status = getattr(store, status_var)
+                    if status == "completed" and not event_info["repeatable"]:
+                        continue
+                available.append(event_info)
+        return available
 
-    def template_dlc_check_ending():
-        """
-        檢查 DLC 結局條件
+# ============================================================================
+# 4. 結局定義
+# ============================================================================
 
-        返回: 結局 ID 或 None
-        """
-        # 獲取相關狀態
-        rel = getattr(store, 'template_char_relationship', 'UNMET')
-        st = store.source_time
-        completed = getattr(store, 'template_dlc_completed', False)
-
-        # True End: 完成所有內容 + 最高關係
-        if completed and rel == "PARTNER":
-            return "ending_template_true"
-
-        # Good End: 完成主要內容 + 高關係
-        if completed and rel in ["CLOSE", "PARTNER"]:
-            return "ending_template_good"
-
-        # Normal End: 完成主要內容
-        if completed:
-            return "ending_template_normal"
-
-        # Bad End: 超時但沒完成
-        if st >= 45 and rel == "UNMET":
-            return "ending_template_bad"
-
+init python:
+    def py_dlc_check_ending():
+        """檢查 Py DLC 結局條件"""
+        if store.py_relationship == "PARTNER":
+            return "ending_py_partner"
+        elif store.py_relationship == "CLOSE":
+            return "ending_py_friend"
         return None
 
-    # ============================================================================
-    # 時間線擴展
-    # ============================================================================
+    # 註冊結局檢查器
+    py_dlc_config["ending_checker"] = py_dlc_check_ending
 
-    template_dlc_timeline = {
-        "ST_38-40": {
-            "available_lines": ["template_dlc"],
-            "template_dlc_event": "TEMPLATE_01",
-            "is_holiday": False
+    # 結局資訊
+    py_dlc_config["endings"] = {
+        "ending_py_partner": {
+            "name": "Pythonista：人生苦短，我用 Python",
+            "condition": lambda: store.py_relationship == "PARTNER"
         },
-        "ST_40-42": {
-            "available_lines": ["template_dlc", "cee"],
-            "template_dlc_event": "TEMPLATE_02",
-            "is_holiday": False
-        },
-        "ST_42-45": {
-            "available_lines": ["template_dlc"],
-            "template_dlc_event": "TEMPLATE_03",
-            "is_holiday": True,
-            "holiday_id": "holiday_template"
-        },
+        "ending_py_friend": {
+            "name": "Python 之友：簡潔之美",
+            "condition": lambda: store.py_relationship == "CLOSE"
+        }
     }
-
-    # ============================================================================
-    # 結局定義
-    # ============================================================================
-
-    template_dlc_endings = {
-        "ending_template_true": {
-            "name": "模板 True End",
-            "condition": lambda: (
-                getattr(store, 'template_dlc_completed', False) and
-                getattr(store, 'template_char_relationship', '') == "PARTNER"
-            )
-        },
-        "ending_template_good": {
-            "name": "模板 Good End",
-            "condition": lambda: getattr(store, 'template_dlc_completed', False)
-        },
-        "ending_template_normal": {
-            "name": "模板 Normal End",
-            "condition": lambda: True
-        },
-        "ending_template_bad": {
-            "name": "模板 Bad End",
-            "condition": lambda: getattr(store, 'template_char_relationship', '') == "UNMET"
-        },
-    }
-
-    # ============================================================================
-    # 註冊 DLC
-    # ============================================================================
-
-    # 構建完整的 DLC 信息
-    template_dlc_full_info = dict(template_dlc_info)
-    template_dlc_full_info["ending_checker"] = template_dlc_check_ending
-    template_dlc_full_info["timeline_data"] = template_dlc_timeline
-    template_dlc_full_info["endings"] = template_dlc_endings
-    template_dlc_full_info["options"] = template_dlc_options
-
-    # 註冊到系統
-    register_dlc(template_dlc_full_info)
-
-    # 如果需要禁用主線結局
-    if template_dlc_options["disable_main_ending"]:
-        store.dlc_disable_main_ending = True
-        store.dlc_custom_ending_threshold = template_dlc_options["custom_ending_threshold"]

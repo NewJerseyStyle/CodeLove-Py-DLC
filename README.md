@@ -1,102 +1,141 @@
-# CodeLove DLC Template
+# CodeLove-Py-DLC
 
-源界 (Source Realm) 的 DLC 開發模板。使用此模板創建可與主線整合的擴展內容。
+源界 (Source Realm) 的 Python 語言角色 DLC。這是一個完整的可運行範例，展示如何為源界創建 DLC。
 
-## 快速開始
+## 架構說明
 
-### 1. 使用此模板
+### 區域導向設計
 
-點擊 GitHub 頁面上的 **"Use this template"** 按鈕，或：
+本 DLC 採用**區域導向**設計：
 
-```bash
-# 克隆模板
-git clone https://github.com/YOUR_USERNAME/CodeLove-DLC.git my-dlc
-cd my-dlc
-rm -rf .git && git init  # 重新初始化為你的專案
+```
+廣場（主線樞紐）
+    └── [前往其他區域]
+            │
+            └── Zen Garden（Py DLC 區域）
+                    │
+                    ├── 和 Py 學習（事件）
+                    ├── 和 Py 聊天
+                    ├── 在花園散步
+                    └── 返回廣場
 ```
 
-### 2. 重命名
+**優點**：
+- DLC 有自己的區域，不干擾主線
+- 區域內部自己管理事件和解鎖條件
+- 玩家可以自由進出，不強制時間對齊
 
-```bash
-# 全局替換（建議使用編輯器）
-# template_dlc → your_dlc_name
-# template_char → your_char_id
-# TEMPLATE → YOUR_CHAPTER_PREFIX
+## 角色：Py (Python)
+
+### 語言特性映射
+
+| Python 特性 | 角色表現 |
+|------------|---------|
+| 動態型別 | 不要求事先定義型別，但會「感覺」到型別不合適 |
+| 縮排語法 | 對格式非常敏感，混亂的格式會讓她不適 |
+| GIL | 可以同時做很多事，但某個時刻只能專注一件事 |
+| Zen of Python | 追求簡潔、優雅、明確 |
+| "Batteries included" | 總是帶著很多工具 |
+| 鴨子型別 | 「如果它走起來像鴨子，叫起來像鴨子...」 |
+
+### 關係進程
+
+```
+UNMET → ACQUAINTED → FRIEND → CLOSE → PARTNER
 ```
 
-### 3. 打包為 RPA
+## 章節內容
 
-DLC 不需要完整的 Ren'Py 專案。只需將 `.rpy` 檔案打包：
+| 章節 | 教學重點 | 解鎖條件 |
+|------|---------|---------|
+| PY_01 | 縮排與格式 | 完成 C_01 |
+| PY_02 | 列表推導式 | Py 關係達 FRIEND |
+| PY_03 | GIL 與並發 | Py 關係達 CLOSE |
 
-```bash
-# 在主遊戲目錄下，使用 Ren'Py 的 RPA 打包工具
-# 或手動建立目錄結構後壓縮
+## 安裝
+
+### 方法 1：直接複製
+
+將整個 `CodeLove-Py-DLC` 資料夾複製到主遊戲的以下位置：
+
+```
+SourceRealm/
+└── game/
+    └── rpy/
+        └── dlc/
+            └── py_dlc/        ← 改名為 py_dlc
+                ├── config.rpy
+                ├── characters.rpy
+                ├── endings.rpy
+                └── events/
+                    ├── zen_garden_hub.rpy
+                    └── PY_01_indentation.rpy
 ```
 
-### 4. 安裝
+### 方法 2：ZIP 分發
 
-將打包好的 RPA 檔案放入主遊戲的 `game/` 目錄即可。
+1. 將此資料夾打包為 ZIP
+2. 用戶解壓到 `game/rpy/dlc/py_dlc/`
+
+## 驗證安裝
+
+1. 啟動遊戲
+2. 完成序章和 C_01
+3. 在廣場選擇「前往其他區域」
+4. 應該看到「Zen Garden」選項
 
 ## 文件結構
 
 ```
-your_dlc/
-├── README.md           # 說明文件
-├── config.rpy          # DLC 配置和註冊
-├── characters.rpy      # 角色定義
-├── events/             # 事件文件
-│   └── YOUR_01.rpy
-└── endings.rpy         # 結局定義
+CodeLove-Py-DLC/
+├── README.md                    # 本文件
+├── config.rpy                   # DLC 配置和區域註冊
+├── characters.rpy               # Py 角色定義
+├── endings.rpy                  # 結局定義
+└── events/
+    ├── zen_garden_hub.rpy       # 區域入口和樞紐菜單
+    └── PY_01_indentation.rpy    # 第一章：縮排教學
 ```
 
-## 開發步驟
+## 開發指南
 
-### 1. 配置 (`config.rpy`)
+### 創建新區域
 
-更新基本資訊：
+1. 在 `config.rpy` 中使用 `register_dlc_region()` 註冊區域：
 
 ```python
-your_dlc_config = {
-    "id": "your_dlc",
-    "name": "Your DLC Name",
-    "author": "Your Name",
-    "version": "1.0.0",
-    "description": "DLC 描述",
-}
+register_dlc_region("your_region", {
+    "name": "Your Region Name",
+    "description": "區域描述",
+    "dlc_id": "your_dlc",
+    "entry_label": "enter_your_region",  # 入口 label
+    "unlock_condition": lambda: True,      # 解鎖條件
+})
 ```
 
-### 2. 創建角色 (`characters.rpy`)
+2. 創建入口 label 和區域樞紐：
 
-定義角色、語言特性、關係進程。
+```renpy
+label enter_your_region:
+    scene bg your_region with fade
+    narrator "你來到了 Your Region。"
+    jump your_region_hub
 
-### 3. 編寫事件 (`events/`)
+label your_region_hub:
+    # 區域內的菜單
+    menu:
+        "做某事":
+            jump do_something
+        "返回廣場":
+            jump return_to_plaza
+```
 
-按照模板結構編寫章節，使用：
-- `complete_chapter()` 標記完成
-- `track_affection()` 追蹤好感度
+### 添加新事件
 
-### 4. 創建結局 (`endings.rpy`)
-
-定義至少一個結局，使用 `record_ending()` 記錄。
-
-## 測試
-
-1. 將 DLC 資料夾放入主遊戲的 `game/rpy/dlc/` 目錄
-2. 啟動遊戲
-3. 檢查 `debug_dlc_status` 確認已註冊
-
-## 發布清單
-
-- [ ] 所有檔案使用 UTF-8 編碼
-- [ ] 圖片放入 `images/YourLanguage/`
-- [ ] 更新 README 說明安裝方法
-- [ ] 打包為 RPA 或 ZIP
-
-## 支援
-
-- [DLC_DEVELOPER_GUIDE.md](../DLC_DEVELOPER_GUIDE.md) - 完整開發指南
-- [DLC_QUICK_REFERENCE.md](../DLC_QUICK_REFERENCE.md) - 快速參考
+1. 在 `config.rpy` 的 `py_region_events` 中添加事件定義
+2. 創建對應的 label
+3. 事件結束後跳轉回區域樞紐
 
 ## 授權
 
-MIT License（或根據主遊戲授權調整）
+MIT License

@@ -1,127 +1,98 @@
 # ============================================================================
-# DLC 模板 - 結局
+# Py DLC 結局
 # ============================================================================
 
 # ============================================================================
-# True End: 完美融合
+# 結局：Pythonista（Partner 結局）
 # ============================================================================
 
-label ending_template_true:
-    scene bg plaza_evening
-    with Fade(3.0, 1.0, 3.0)
+label ending_py_partner:
+    scene black with fade
 
-    show template_char happy at center
-    show cee normal at left
-    show jawa normal at right
+    python hide:
+        narrator("源界時間：ST 38+")
+        narrator("結局：Pythonista")
 
-    narrator "源界的黃昏籠罩著資訊廣場，所有角色聚集在一起。"
+    scene bg plaza with dissolve
+    show py happy at center
 
-    template_char "（看著你）我從沒想過，會有人能同時理解這麼多不同的思維方式。"
+    py "（深情地）你還記得我們第一次見面的時候嗎？"
 
-    cee "有效率。你的算法知識已經超越了大多數居民。"
+    py "在 zen garden，你幫我整理那些石子。"
 
-    jawa "而且你懂得何時使用哪種方法。這才是真正的智慧。"
+    py "那時候我就覺得... 你很特別。"
 
-    narrator "模板角色走到你面前。"
+    py "（微笑）{i}Simple is better than complex.{/i}"
 
-    template_char "謝謝你。不只是因為你幫了我，而是因為你讓我看到了可能性。"
+    py "我們的關係也是這樣。不需要複雜的東西。"
 
-    template_char "不同的語言、不同的思維，不是障礙，而是力量。"
+    py "只要簡潔、明確、優雅。"
 
-    narrator "你感到一種深刻的連結——不只是與某個角色，而是與整個源界。"
+    # 轉場到現實
+    scene black with fade
 
-    scene bg laboratory
-    with Dissolve(3.0)
+    python hide:
+        narrator("你回到了現實。")
+        narrator("打開電腦，你開始寫 Python 代碼。")
+        narrator("每一行代碼，都讓你想起 Py 的笑容。")
+        narrator("縮排整齊，風格優雅。")
+        narrator("就像她教你的那樣。")
 
-    narrator "現實世界中，阿源看著螢幕上的數據，目瞪口呆。"
+    # 成就
+    $ record_ending("py_partner", "Pythonista：人生苦短，我用 Python")
 
-    source "這...這些代碼怎麼可能如此完美？每個部分都用了最適合的語言..."
-
-    narrator "【DLC 結局：完美融合】"
-    narrator "你成為了連接不同世界的橋樑。"
-
-    $ record_ending("ending_template_true")
-
-    jump ending_final_ack
-
-# ============================================================================
-# Good End: 新的朋友
-# ============================================================================
-
-label ending_template_good:
-    scene bg plaza_noon
-
-    show template_char happy at center
-
-    narrator "你在源界的旅程即將結束。"
-
-    template_char "聽說你要走了？"
-
-    player "嗯，該回去了。"
-
-    template_char "（微笑）那麼，下次再見。"
-
-    template_char "這個世界的大門永遠為你敞開。"
-
-    narrator "你和模板角色握手道別。"
-
-    template_char "對了，如果你在現實世界遇到任何編程問題..."
-
-    template_char "試著用你在這裡學到的思維方式。我會『在這裡』等你的。"
-
-    narrator "【DLC 結局：新的朋友】"
-    narrator "你收穫了一段跨越次元的友情。"
-
-    $ record_ending("ending_template_good")
-
-    jump ending_final_ack
+    return
 
 # ============================================================================
-# Normal End: 匆匆過客
+# 結局：Python 之友（Close 結局）
 # ============================================================================
 
-label ending_template_normal:
-    scene bg plaza_afternoon
+label ending_py_friend:
+    scene black with fade
 
-    show template_char normal at center
+    python hide:
+        narrator("源界時間：ST 38+")
+        narrator("結局：Python 之友")
 
-    narrator "你在源界的時間即將結束。"
+    scene bg plaza with dissolve
+    show py normal at center
 
-    template_char "哦，你要走了？"
+    py "（微笑）時間過得真快。"
 
-    player "是的。"
+    py "你學會了很多東西。"
 
-    template_char "好吧。一路順風。"
+    py "（溫柔地）雖然我們沒有成為... 那種關係。"
 
-    narrator "模板角色點點頭，轉身繼續工作。"
+    py "但你永遠是 Python 的朋友。"
 
-    narrator "你感覺你們之間還有很多可以探索的內容..."
+    py "{i}Readability counts.{/i}"
 
-    narrator "【DLC 結局：匆匆過客】"
-    narrator "你完成了 DLC 的主要內容，但似乎錯過了些什麼。"
+    py "你寫的代碼，現在可讀性很高了。"
 
-    $ record_ending("ending_template_normal")
+    # 轉場
+    scene black with fade
 
-    jump ending_final_ack
+    python hide:
+        narrator("你回到了現實。")
+        narrator("你成為了一名 Python 開發者。")
+        narrator("每次寫代碼，你都會想起 Py 的教導。")
+        narrator("Simple. Clear. Elegant.")
+
+    # 成就
+    $ record_ending("py_friend", "Python 之友：簡潔之美")
+
+    return
 
 # ============================================================================
-# Bad End: 錯過
+# 輔助函數
 # ============================================================================
 
-label ending_template_bad:
-    scene bg plaza_night
+init python:
+    def record_ending(ending_id, ending_name):
+        """記錄結局"""
+        if not hasattr(store, 'achieved_endings'):
+            store.achieved_endings = []
 
-    narrator "你在資訊廣場遊蕩，卻始終沒有找到那個傳說中的角色。"
-
-    narrator "時間就這樣流逝..."
-
-    narrator "當你回到現實時，你只記得模糊的印象——好像有一個人在某處等你。"
-
-    narrator "但你已經不記得是誰，也不記得在哪裡。"
-
-    narrator "【DLC 結局：錯過】"
-    narrator "有些相遇，錯過了就是錯過了。"
-
-    $ record_ending("ending_template_bad")
-
-    jump ending_final_ack
+        if ending_id not in store.achieved_endings:
+            store.achieved_endings.append(ending_id)
+            narrator(f"達成結局：{ending_name}")
