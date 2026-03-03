@@ -54,28 +54,16 @@ UNMET → ACQUAINTED → FRIEND → CLOSE → PARTNER
 
 ## 安裝
 
-### 方法 1：直接複製
+1. 在 Release 下載 ZIP：https://github.com/NewJerseyStyle/CodeLove-Py-DLC/releases
+2. 用戶解壓到 `game/`
 
 將整個 `CodeLove-Py-DLC` 資料夾複製到主遊戲的以下位置：
 
 ```
 SourceRealm/
-└── game/
-    └── rpy/
-        └── dlc/
-            └── py_dlc/        ← 改名為 py_dlc
-                ├── config.rpy
-                ├── characters.rpy
-                ├── endings.rpy
-                └── events/
-                    ├── zen_garden_hub.rpy
-                    └── PY_01_indentation.rpy
+└── game/        ← 複製到這個文件夾裡任何地方就可以
+    └── CodeLove-Py-DLC
 ```
-
-### 方法 2：ZIP 分發
-
-1. 將此資料夾打包為 ZIP
-2. 用戶解壓到 `game/rpy/dlc/py_dlc/`
 
 ## 驗證安裝
 
